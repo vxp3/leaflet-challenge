@@ -1,19 +1,38 @@
 // Store API into URL
 var url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
+var API_KEY = "pk.eyJ1IjoidmluaHAzMyIsImEiOiJja2NlOWRvZjQwMTdhMzRxZnFleHZxOWMxIn0.UgtcYJcKG1GPcGwy9QUIZQ";
+
 d3.json(url, function(data) {
     var earthquakeData = data;
     createFeatures(earthquakeData);
   });
 
 // Define a function  
+
+function Color(mag) {
+  if (mag <= 1) {
+       return "#ADFF2F";
+   } else if (mag <= 2) {
+       return "#9ACD32";
+   } else if (mag <= 3) {
+       return "#FFFF00";
+   } else if (mag <= 4) {
+       return "#ffd700";
+   } else if (mag <= 5) {
+       return "#FFA500";
+   } else {
+       return "#FF0000";
+   };
+ }
+
 function createFeatures(earthquakeData) {
     // Give each feature a popup describing the place and time of the earthquake
     function onEachFeature(feature, layer) {
       return new L.circle([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], {
         fillOpacity: 1,
-        color: chooseColor(feature.properties.mag),
-        fillColor: chooseColor(feature.properties.mag),
+        color: Color(feature.properties.mag),
+        fillColor: Color(feature.properties.mag),
         radius: markerSize(feature.properties.mag*2000)
       });
     }
@@ -35,7 +54,7 @@ function createMap(earthquakes) {
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
-    id: "mapbox/streets-v11",
+    id: "mapbox/light-v9",
     accessToken: API_KEY
   });
 
@@ -66,6 +85,27 @@ function createMap(earthquakes) {
     layers: [streetmap, earthquakes]
   });
 
+  //Adding Legend
+
+  var legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function (map) {
+  
+    var div = L.DomUtil.create('div', 'info legend'),
+        magnitudes = [0, 1, 2, 3, 4, 5],
+        
+        labels = ["0-1", "1-2", "2-3", "3-4", "4-5", "5+"];
+
+        for (var i = 0; i < magnitudes.length; i++) {
+          div.innerHTML +=
+              '<i style="background:' + Color(magnitudes[i] + 1) + '"></i> ' + 
+      + magnitudes[i] + (magnitudes[i + 1] ? ' - ' + magnitudes[i + 1] + '<br>' : ' + ');
+      }
+  
+      return div;
+  };
+  
+      legend.addTo(myMap);
   // Create a layer control
   // Pass in our baseMaps and overlayMaps
   // Add the layer control to the map
@@ -73,19 +113,7 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 };
-function Color(magnitude) {
-    return magnitude > 5 ? "blue":
-      magnitude > 4 ? "yellow":
-        magnitude > 3 ? "red":
-          magnitude > 2 ? "orange":
-            magnitude > 1 ? "yellowgreen":
-              "greenyellow";
-  };
-  
+
 function markerSize(magnitude) {
     return magnitude * 10;
 };
-
-L.control.layers(baseMaps, overlayMaps, {
-  collapsed: false
-}).addTo(myMap);
