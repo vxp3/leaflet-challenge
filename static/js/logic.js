@@ -1,9 +1,6 @@
 // Store API into URL
 var url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
-var API_KEY = "pk.eyJ1IjoidmluaHAzMyIsImEiOiJja2NlNm9oa2EwNWZ1MzNwOHRqOGM5cGFzIn0.o6OxoTGTZFKcUhXwTkBiPA";
-
-
 d3.json(url, function(data) {
     var earthquakeData = data;
     createFeatures(earthquakeData);
@@ -76,7 +73,7 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 };
-function chooseColor(magnitude) {
+function Color(magnitude) {
     return magnitude > 5 ? "blue":
       magnitude > 4 ? "yellow":
         magnitude > 3 ? "red":
@@ -88,3 +85,7 @@ function chooseColor(magnitude) {
 function markerSize(magnitude) {
     return magnitude * 10;
 };
+
+L.control.layers(baseMaps, overlayMaps, {
+  collapsed: false
+}).addTo(myMap);
